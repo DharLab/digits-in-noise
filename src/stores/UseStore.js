@@ -7,7 +7,9 @@ export const UseStore = defineStore('store', () => {
   const noisePlayer = ref(null);
   const leftOffset = ref(null);
   const rightOffset = ref(null);
-  const listenLevel = ref(0);
+  const leftZeroSPL = ref(null);
+  const rightZeroSPL = ref(null);
+  const listenLevel = ref(65);
   const responses = ref(null);
   const currentSNR = ref(null);
   
@@ -15,8 +17,8 @@ export const UseStore = defineStore('store', () => {
   const calibrationValid = computed(() => {
     if (soundLibrary.value == null ||
       noisePlayer.value == null ||
-      leftOffset.value == null ||
-      rightOffset.value == null ||
+      leftZeroSPL.value == null ||
+      rightZeroSPL.value == null ||
       listenLevel.value == null) {
       return false;
     } else {
@@ -37,5 +39,5 @@ export const UseStore = defineStore('store', () => {
     return prm
   }
 
-  return { pid, soundLibrary, noisePlayer, leftOffset, rightOffset, listenLevel, calibrationValid, addResponse, responses, currentSNR }
+  return { pid, soundLibrary, noisePlayer, leftOffset, rightOffset, leftZeroSPL, rightZeroSPL, listenLevel, calibrationValid, addResponse, responses, currentSNR }
 })

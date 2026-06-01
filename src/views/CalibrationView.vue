@@ -12,8 +12,8 @@
     <div v-if="nextDisabled == false" class="mt-6">
       <p>Calibration loaded</p>
       <ul class="ml-6">
-        <li>Left Offset: {{ store.leftOffset }}</li>
-        <li>Right Offset: {{ store.rightOffset }}</li>
+        <li>Left Zero SPL: {{ store.leftZeroSPL }} dB SPL</li>
+        <li>Right Zero SPL: {{ store.rightZeroSPL }} dB SPL</li>
       </ul>
     </div>
   </v-container>
@@ -42,11 +42,11 @@ onMounted(()=>{
 
 const calibrationDialog = ref(false);
 
-const saveCalibration = async (leftOffset, rightOffset) => {
+const saveCalibration = async (leftZeroSPL, rightZeroSPL) => {
   let saveObj = {
     createDate: new Date().toLocaleString(),
-    leftOffset: leftOffset,
-    rightOffset: rightOffset
+    leftZeroSPL: leftZeroSPL,
+    rightZeroSPL: rightZeroSPL
   }
   var blob = new Blob([JSON.stringify(saveObj)], { type: "application/json" });
   await saveAs(blob, "calibration.json");
@@ -60,13 +60,13 @@ const fileLoaded = (f) => {
   const reader = new FileReader();
   reader.onload = function () {
     let loadedCalibration = JSON.parse(reader.result);
-    if(loadedCalibration.leftOffset != null && loadedCalibration.rightOffset != null){
-      store.leftOffset = loadedCalibration.leftOffset;
-      store.rightOffset= loadedCalibration.rightOffset;
+    if(loadedCalibration.leftZeroSPL != null && loadedCalibration.rightZeroSPL != null){
+      store.leftZeroSPL = loadedCalibration.leftZeroSPL;
+      store.rightZeroSPL = loadedCalibration.rightZeroSPL;
     }
   };
   reader.readAsText(f);
 }
 
-const nextDisabled = computed(() => store.leftOffset == null || store.rightOffset == null);
+const nextDisabled = computed(() => store.leftZeroSPL == null || store.rightZeroSPL == null);
 </script>

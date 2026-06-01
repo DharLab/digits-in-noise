@@ -13,7 +13,7 @@
               level.
             </p>
 
-            <v-btn class="mt-2" @click="!isPlaying ? play(-Infinity) : stop()" color="primary">
+            <v-btn class="mt-2" :disabled="isPlaying" @click="play(-Infinity)" color="primary">
               Play Digits<v-icon>play_circle_filled</v-icon>
             </v-btn>
           </div>
@@ -40,8 +40,8 @@
 
       <div class="pa-4">
         <v-radio-group v-model="store.listenLevel" hide-details :disabled="isPlaying">
-          <v-radio label="65dB (default)" :value="0"></v-radio>
-          <v-radio label="70dB" :value="5"></v-radio>
+          <v-radio label="65dB (default)" :value="65"></v-radio>
+          <v-radio label="70dB" :value="70"></v-radio>
         </v-radio-group>
       </div>
     </div>
