@@ -12,16 +12,16 @@
                     <div v-if="!isPlaying">Play Left Channel Tone<v-icon>play_circle_filled</v-icon></div>
                     <div v-else>Stop Left Channel Tone <v-icon>stop_circle</v-icon></div>
                 </v-btn>
-                <v-number-input density="compact" :reverse="false" controlVariant="split" label="Left Channel SPL Reading (dB)" :disabled="isPlaying"
-                    :hideInput="false" :inset="false" variant="solo" v-model="leftZeroSPL"></v-number-input>
+                <v-text-field density="compact" label="Left Channel SPL Reading (dB)" :disabled="isPlaying"
+                    variant="solo" type="number" step="0.1" v-model.number="leftZeroSPL"></v-text-field>
             </div>
             <div>
                 <v-btn :color="isPlaying ? 'warning' : 'secondary'" class="mb-2" @click="playRight">
                     <div v-if="!isPlaying">Play Right Channel Tone<v-icon>play_circle_filled</v-icon></div>
                     <div v-else>Stop Right Channel Tone <v-icon>stop_circle</v-icon></div>
                 </v-btn>
-                <v-number-input density="compact" :reverse="false" controlVariant="split" label="Right Channel SPL Reading (dB)" :disabled="isPlaying"
-                    :hideInput="false" :inset="false" variant="solo" v-model="rightZeroSPL"></v-number-input>
+                <v-text-field density="compact" label="Right Channel SPL Reading (dB)" :disabled="isPlaying"
+                    variant="solo" type="number" step="0.1" v-model.number="rightZeroSPL"></v-text-field>
             </div>
         </div>
         </v-card-text>

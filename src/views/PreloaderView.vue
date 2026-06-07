@@ -90,7 +90,8 @@ const pidrule = (v) => {
 }
 
 const pid = ref(null);
-const submit = () => {
+const submit = async () => {
+    await Tone.start();
     store.pid = pid.value;
     router.push("/calibration")
 }
