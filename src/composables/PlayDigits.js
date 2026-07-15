@@ -14,11 +14,12 @@ export default function PlayDigits() {
     const store = UseStore();
     
     async function play(targetNoiseVolume) {
-        targetNoiseVolume = targetNoiseVolume + store.rightOffset + store.listenLevel
-        let targetDigitsVolume = 0 + store.leftOffset + store.listenLevel
+        store.currentSNR = -targetNoiseVolume;
+        targetNoiseVolume = targetNoiseVolume + store.listenLevel - store.rightZeroSPL
+        let targetDigitsVolume = store.listenLevel - store.leftZeroSPL
         console.log("target noise volume: " + targetNoiseVolume);
         console.log("target digits volume: " + targetDigitsVolume);
-        store.currentSNR = targetDigitsVolume - targetNoiseVolume;
+        //store.currentSNR = targetDigitsVolume - targetNoiseVolume;
         console.log("SNR is " + store.currentSNR);
         isPlaying.value = true;
 
@@ -61,8 +62,9 @@ export default function PlayDigits() {
         const panner = new Tone.Panner({ pan: side == "left" ? -1 : 1 }).toDestination();//pan right = 1, pan left = -1
         calTone = new Tone.Player().connect(panner)
         calTone.buffer =  store.soundLibrary.get("cal_tone")
-        let targetDigitsVolume = 0 + store.leftOffset + store.listenLevel
-        calTone.volume.value = targetDigitsVolume; //volume of digits
+        const zeroSPL = side == "left" ? store.leftZeroSPL : store.rightZeroSPL
+        let targetCalibrationVolume = store.listenLevel - zeroSPL
+        calTone.volume.value = targetCalibrationVolume; //volume of digits
         if(isPlaying.value == false){
             calTone.start();
             isPlaying.value = true;

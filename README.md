@@ -2,6 +2,9 @@
 
 Digits-in-Noise implementation for the NextGenOAE project at the Auditory Research Lab, Northwestern University.
 
+# digits-in-noise
+Temporary deployment link: https://lustrous-mermaid-bdd819.netlify.app/
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

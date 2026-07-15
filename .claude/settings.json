@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:tonejs.github.io)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\haika\\\\Desktop\\\\Dhar Lab\\\\digits-in-noise\" | Select-Object Name, @{Name='Type'; Expression={if\\($_.PSIsContainer\\){'Directory'} else {'File'}}})",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\haika\\\\Desktop\\\\Dhar Lab\\\\digits-in-noise\\\\src\" -Recurse -Force | Select-Object @{Name='Path'; Expression={$_.FullName.Replace\\('c:\\\\Users\\\\haika\\\\Desktop\\\\Dhar Lab\\\\digits-in-noise\\\\', ''\\)}} | Select-Object -ExpandProperty Path | Sort-Object)",
+      "Bash(npm run *)",
+      "Bash(python fix_snr.py \"c:\\\\Users\\\\haika\\\\Downloads\\\\NextGenerationOAEs-DINDataOnlyNoIDs_DATA_2026-06-05_1230.csv\" \"c:\\\\Users\\\\haika\\\\Downloads\\\\NextGenerationOAEs-DINDataOnlyNoIDs_FIXED.csv\")"
+    ]
+  }
+}
