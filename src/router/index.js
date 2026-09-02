@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import { EMBED } from '@/config'
 
 const clinicalRoutes = [
@@ -72,7 +72,10 @@ const activeRoutes = EMBED ? embedRoutes : clinicalRoutes
 const forwardOrder = activeRoutes.map((r) => r.path)
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  // Embed is served as static files under the host at /din/ and loaded via
+  // <iframe src="/din/"> (which may resolve to /din/index.html). Hash history
+  // keeps routing working regardless of the served path and needs no SPA fallback.
+  history: EMBED ? createWebHashHistory() : createWebHistory(import.meta.env.BASE_URL),
   routes: activeRoutes,
 })
 
