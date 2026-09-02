@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:embed": "vite --mode embed",
     "build": "vite build",
+    "build:embed": "vite build --mode embed",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "lint": "eslint . --fix"

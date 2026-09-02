@@ -1,5 +1,6 @@
 import { ref, toRaw } from "vue";
 import { UseStore } from '@/stores/UseStore';
+import { EMBED } from "@/config";
 import * as Tone from "tone";
 import UseWait from "@/composables/UseWait";
 
@@ -8,18 +9,26 @@ const digitsArray = ref([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 //const digitsArray = ref([1,1,1,1,1,1,1]); //for testing purposes
 
 export default function PlayDigits() {
-    
+
     //let isPlaying = ref(false);
     const { wait } = UseWait();
     const store = UseStore();
-    
-    async function play(targetNoiseVolume) {
-        store.currentSNR = -targetNoiseVolume;
-        targetNoiseVolume = targetNoiseVolume + store.listenLevel - store.rightZeroSPL
-        let targetDigitsVolume = store.listenLevel - store.leftZeroSPL
+
+    async function play(rawSNR) {
+        store.currentSNR = -rawSNR;
+
+        // Digit level is fixed for the whole test; only the noise level moves with the staircase.
+        let targetNoiseVolume, targetDigitsVolume;
+        if (EMBED) {
+            // Participant-set comfortable level in dBFS; no real-world SPL calibration.
+            targetDigitsVolume = store.comfortDbfs;
+            targetNoiseVolume = store.comfortDbfs + rawSNR;
+        } else {
+            targetDigitsVolume = store.listenLevel - store.leftZeroSPL;
+            targetNoiseVolume = rawSNR + store.listenLevel - store.rightZeroSPL;
+        }
         console.log("target noise volume: " + targetNoiseVolume);
         console.log("target digits volume: " + targetDigitsVolume);
-        //store.currentSNR = targetDigitsVolume - targetNoiseVolume;
         console.log("SNR is " + store.currentSNR);
         isPlaying.value = true;
 
@@ -56,7 +65,7 @@ export default function PlayDigits() {
         isPlaying.value = false;
     }
 
-    
+
     let calTone;
     async function playCalibrationTone(side){
         const panner = new Tone.Panner({ pan: side == "left" ? -1 : 1 }).toDestination();//pan right = 1, pan left = -1
@@ -71,12 +80,35 @@ export default function PlayDigits() {
         } else {
             calTone.stop();
             isPlaying.value = false;
-        }   
+        }
     }
 
     function stopCalibrationTone(){
         calTone.stop();
         isPlaying.value = false
+    }
+
+    // Embed "set a comfortable level" screen: loop a digit so the participant can
+    // adjust while listening. Level tracks store.comfortDbfs live.
+    let previewPlayer = null;
+    function startLevelPreview() {
+        if (previewPlayer) return;
+        const panner = new Tone.Panner({ pan: -1 }).toDestination();
+        previewPlayer = new Tone.Player().connect(panner);
+        previewPlayer.buffer = store.soundLibrary.get("n5_2");
+        previewPlayer.loop = true;
+        previewPlayer.volume.value = store.comfortDbfs ?? -18;
+        previewPlayer.start();
+    }
+    function setLevelPreviewVolume(db) {
+        if (previewPlayer) previewPlayer.volume.rampTo(db, 0.05);
+    }
+    function stopLevelPreview() {
+        if (previewPlayer) {
+            previewPlayer.stop();
+            previewPlayer.dispose();
+            previewPlayer = null;
+        }
     }
 
     function shuffle(array) {
@@ -89,5 +121,5 @@ export default function PlayDigits() {
         }
         return array;
     }
-    return { play, playCalibrationTone, stopCalibrationTone, isPlaying, digitsArray };
+    return { play, playCalibrationTone, stopCalibrationTone, startLevelPreview, setLevelPreviewVolume, stopLevelPreview, isPlaying, digitsArray };
 }

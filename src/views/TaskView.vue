@@ -50,6 +50,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { UseStore } from '@/stores/UseStore';
+import { EMBED } from '@/config';
 //import UseWait from "@/composables/UseWait";
 import PlayDigits from "@/composables/PlayDigits";
 //import * as Tone from "tone";
@@ -162,6 +163,11 @@ const nextClick = async () => {
 
 
 onBeforeRouteLeave((to, from, next)=>{
+  if(EMBED){
+    // Host owns navigation/chrome in the embed; no "unsaved changes" prompt.
+    next()
+    return
+  }
   console.log(to);
   if(to.path == "/end"){
     next()

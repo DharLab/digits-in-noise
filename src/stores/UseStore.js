@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { EMBED } from '@/config'
 
 export const UseStore = defineStore('store', () => {
   const pid =ref(null);
@@ -10,24 +11,26 @@ export const UseStore = defineStore('store', () => {
   const leftZeroSPL = ref(null);
   const rightZeroSPL = ref(null);
   const listenLevel = ref(65);
+  const comfortDbfs = ref(null); // embed only: participant-set digit level in dBFS
   const responses = ref(null);
   const currentSNR = ref(null);
-  
+
 
   const calibrationValid = computed(() => {
-    if (soundLibrary.value == null ||
-      noisePlayer.value == null ||
-      leftZeroSPL.value == null ||
-      rightZeroSPL.value == null ||
-      listenLevel.value == null) {
+    if (soundLibrary.value == null || noisePlayer.value == null) {
       return false;
-    } else {
-      return true;
     }
+    if (EMBED) {
+      // Embed replaces SPL-meter calibration with a participant "comfortable level" step.
+      return comfortDbfs.value != null;
+    }
+    return leftZeroSPL.value != null &&
+      rightZeroSPL.value != null &&
+      listenLevel.value != null;
   })
 
   async function addResponse(response) {
-    
+
     const prm = new Promise((resolve) => {
       if (responses.value == null) {
         responses.value = [];
@@ -39,5 +42,5 @@ export const UseStore = defineStore('store', () => {
     return prm
   }
 
-  return { pid, soundLibrary, noisePlayer, leftOffset, rightOffset, leftZeroSPL, rightZeroSPL, listenLevel, calibrationValid, addResponse, responses, currentSNR }
+  return { pid, soundLibrary, noisePlayer, leftOffset, rightOffset, leftZeroSPL, rightZeroSPL, listenLevel, comfortDbfs, calibrationValid, addResponse, responses, currentSNR }
 })
