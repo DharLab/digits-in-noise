@@ -37,7 +37,7 @@
         <v-btn :disabled="enteredDigits.length == 0" @click="deleteClick()" size="x-large"
           class="mr-2 mb-2"><v-icon>chevron_left</v-icon></v-btn>
         <v-btn :disabled="disableNumberButtons" @click="numberClick(0)" size="x-large" class="mr-2 mb-2">0</v-btn>
-        <v-btn :disabled="enteredDigits.length != 3 || isPlaying==true" @click="nextClick()" size="x-large" class="mb-2">OK</v-btn>
+        <v-btn :disabled="enteredDigits.length != 3 || (!EMBED && isPlaying)" @click="nextClick()" size="x-large" class="mb-2">OK</v-btn>
       </div>
       <p class="mt-4 text-medium-emphasis">
       {{ currentTrial + "/" + totalTrials }}
@@ -58,7 +58,7 @@ import { onBeforeRouteLeave, useRouter } from 'vue-router';
 
 const store = UseStore();
 //const { wait } = UseWait();
-const {play, isPlaying, digitsArray} = PlayDigits();
+const {play, stopPlayback, isPlaying, digitsArray} = PlayDigits();
 const router = useRouter();
 
 //loudest noise SNR is -24 (so max noise is +24) and softest noise SNR is 16 (so min noise is -16)
@@ -165,6 +165,7 @@ const nextClick = async () => {
 onBeforeRouteLeave((to, from, next)=>{
   if(EMBED){
     // Host owns navigation/chrome in the embed; no "unsaved changes" prompt.
+    stopPlayback()
     next()
     return
   }

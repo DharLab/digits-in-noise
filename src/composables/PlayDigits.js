@@ -8,13 +8,41 @@ const isPlaying = ref(false);
 const digitsArray = ref([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 //const digitsArray = ref([1,1,1,1,1,1,1]); //for testing purposes
 
+// Trial-audio generation guard: each play() bumps playGen; an in-flight play()
+// bails at its next checkpoint once superseded, so the participant can answer
+// and advance without waiting for the current trial's audio to finish.
+let playGen = 0;
+let activeSeq = null;
+let activePlayer = null;
+let activePanner = null;
+
 export default function PlayDigits() {
 
     //let isPlaying = ref(false);
     const { wait } = UseWait();
     const store = UseStore();
 
+    // Immediately silence and tear down whatever the current trial is playing.
+    function stopPlayback() {
+        playGen++;
+        try {
+            const np = toRaw(store.noisePlayer);
+            if (np) { np.volume.value = -Infinity; np.stop(); }
+        } catch { /* noise player may not be started */ }
+        try { Tone.getTransport().stop(); Tone.getTransport().cancel(); } catch { /* noop */ }
+        try { if (activeSeq) activeSeq.dispose(); } catch { /* noop */ }
+        try { if (activePlayer) activePlayer.dispose(); } catch { /* noop */ }
+        try { if (activePanner) activePanner.dispose(); } catch { /* noop */ }
+        activeSeq = null;
+        activePlayer = null;
+        activePanner = null;
+        isPlaying.value = false;
+    }
+
     async function play(rawSNR) {
+        stopPlayback();          // cut any still-playing trial audio
+        const gen = playGen;     // this trial's generation
+
         store.currentSNR = -rawSNR;
 
         // Digit level is fixed for the whole test; only the noise level moves with the staircase.
@@ -46,20 +74,24 @@ export default function PlayDigits() {
         toRaw(store.noisePlayer).start()
         toRaw(store.noisePlayer).volume.rampTo(targetNoiseVolume, 0.5);
         await wait(1000);
+        if (gen !== playGen) return;   // superseded by the next trial
 
-        const panner = new Tone.Panner({ pan: -1 }).toDestination();//pan right = 1, pan left = -1
-        const player = new Tone.Player().connect(panner);
-        player.volume.value = targetDigitsVolume; //volume of digits
-        const seq = new Tone.Sequence((time, index) => {
-            player.buffer = store.soundLibrary.get(index);
-            player.start(time);
+        activePanner = new Tone.Panner({ pan: -1 }).toDestination();//pan right = 1, pan left = -1
+        activePlayer = new Tone.Player().connect(activePanner);
+        activePlayer.volume.value = targetDigitsVolume; //volume of digits
+        activeSeq = new Tone.Sequence((time, index) => {
+            activePlayer.buffer = store.soundLibrary.get(index);
+            activePlayer.start(time);
         }, [target1, target2, target3], "1.0796").start(); // 175ms second delay between digits. Calculated based on assumed duration of 0.9046s for all digit recordings.
-        seq.loop = false;
+        activeSeq.loop = false;
         Tone.getTransport().start()
 
         await wait(3700);
+        if (gen !== playGen) return;
+
         toRaw(store.noisePlayer).volume.rampTo(-Infinity, 0.5)
         await wait(500);
+        if (gen !== playGen) return;
         toRaw(store.noisePlayer).stop();
 
         isPlaying.value = false;
@@ -121,5 +153,5 @@ export default function PlayDigits() {
         }
         return array;
     }
-    return { play, playCalibrationTone, stopCalibrationTone, startLevelPreview, setLevelPreviewVolume, stopLevelPreview, isPlaying, digitsArray };
+    return { play, stopPlayback, playCalibrationTone, stopCalibrationTone, startLevelPreview, setLevelPreviewVolume, stopLevelPreview, isPlaying, digitsArray };
 }
