@@ -49,12 +49,9 @@ const load = () => {
         files.cal_tone = B + "sounds/cal_tone.wav";
     }
     for (let d = 0; d <= 9; d++) {
-        // Only the flat-intonation take (_2) is played in the task; the standalone
-        // build still loads all three so its tools can use them.
-        const versions = EMBED ? [2] : [1, 2, 3];
-        for (const v of versions) {
-            files["n" + d + "_" + v] = B + "sounds/newSR_" + d + "_" + v + "_rs.wav";
-        }
+        // Only the flat-intonation take (_2) is ever played in the task; the _1/_3
+        // takes aren't used anywhere, so don't require them to exist.
+        files["n" + d + "_2"] = B + "sounds/newSR_" + d + "_2_rs.wav";
     }
 
     store.soundLibrary = new Tone.ToneAudioBuffers(files, () => {
