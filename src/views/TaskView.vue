@@ -1,9 +1,6 @@
 <template>
   <v-container>
-    <div v-if="state == 'init'" class="text-center">
-      <v-btn @click="startCountdown">Start</v-btn>
-    </div>
-    <div v-else-if="state == 'countdown'" class="text-center">
+    <div v-if="state == 'countdown'" class="text-center">
       <h1>{{ counter }}</h1>
     </div>
     <div v-else class="text-center">
@@ -37,7 +34,7 @@
         <v-btn :disabled="enteredDigits.length == 0" @click="deleteClick()" size="x-large"
           class="mr-2 mb-2"><v-icon>chevron_left</v-icon></v-btn>
         <v-btn :disabled="disableNumberButtons" @click="numberClick(0)" size="x-large" class="mr-2 mb-2">0</v-btn>
-        <v-btn :disabled="enteredDigits.length != 3 || (!EMBED && isPlaying)" @click="nextClick()" size="x-large" class="mb-2">OK</v-btn>
+        <v-btn :disabled="enteredDigits.length != 3 || isPlaying" @click="nextClick()" size="x-large" class="mb-2">OK</v-btn>
       </div>
       <p class="mt-4 text-medium-emphasis">
       {{ currentTrial + "/" + totalTrials }}
@@ -48,7 +45,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { UseStore } from '@/stores/UseStore';
 import { EMBED } from '@/config';
 //import UseWait from "@/composables/UseWait";
@@ -69,31 +66,42 @@ const totalTrials = 25; //total trials
 const currentTrial = ref(1);
 
 
-const state = ref("init"); //init, countdown, run
+const state = ref("countdown"); //countdown, run
 onMounted(() => {
   console.log(store.calibrationValid)
   if(store.calibrationValid == false){
-    router.push("/")
+    router.push(EMBED ? "/" : "/preloader")
   } else {
-    state.value = "init";
-    counter.value = 3;
+    startCountdown();
   }
-  
+
 })
 
 
 const counter = ref(3);
+let counterInt = null;
 const startCountdown = () => {
   state.value = "countdown"
-  const counterInt = setInterval(() => {
+  counterInt = setInterval(() => {
     counter.value -= 1;
     if (counter.value <= 0) {
       clearInterval(counterInt);
+      counterInt = null;
       state.value = "run";
       play(targetNoiseVolume);
     }
   }, 1000)
 }
+
+// A Start Over pressed again before this countdown finishes remounts TaskView without
+// this interval ever reaching 0 on its own - without this, the orphaned interval still
+// fires later and plays stale audio from the discarded run (see bug report 2026-10-13).
+onUnmounted(() => {
+  if (counterInt != null) {
+    clearInterval(counterInt);
+    counterInt = null;
+  }
+});
 
 const enteredDigits = ref([]);
 const disableNumberButtons = computed(() => enteredDigits.value.length >= 3 ? true : false);
@@ -172,7 +180,7 @@ onBeforeRouteLeave((to, from, next)=>{
   console.log(to);
   if(to.path == "/end"){
     next()
-  } else if(to.path =="/" && store.calibrationValid == false){
+  } else if(to.path =="/preloader" && store.calibrationValid == false){
     next()
   } else {
     const answer = window.confirm('Do you really want to leave? You may have unsaved changes!')

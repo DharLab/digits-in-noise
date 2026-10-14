@@ -1,5 +1,6 @@
 <template>
   <v-container class="text-center" style="max-width: 720px;">
+    <p v-if="!EMBED" class="text-overline text-medium-emphasis mb-1">Patient Calibration</p>
     <v-sheet border rounded="lg" color="blue-lighten-5" class="pa-6 mx-auto mb-12" max-width="600">
       <p>Set a comfortable level where you hear the speech clearly.</p>
     </v-sheet>
@@ -14,6 +15,12 @@
     <v-btn class="mt-12" size="large" color="primary" @click="next">
       Next <v-icon>chevron_right</v-icon>
     </v-btn>
+
+    <div v-if="!EMBED" class="mt-8">
+      <router-link to="/researcher-calibration" class="text-caption text-medium-emphasis">
+        Researcher? Switch to Researcher Calibration
+      </router-link>
+    </div>
   </v-container>
 </template>
 
@@ -21,6 +28,7 @@
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { UseStore } from '@/stores/UseStore';
+import { EMBED } from '@/config';
 import PlayDigits from '@/composables/PlayDigits';
 
 const router = useRouter();
@@ -36,9 +44,10 @@ const level = ref(store.comfortDbfs ?? DEFAULT);
 
 onMounted(() => {
   if (store.soundLibrary == null) {
-    router.push('/');
+    router.push(EMBED ? '/' : '/preloader');
     return;
   }
+  store.calibrationMode = 'comfort';
   store.comfortDbfs = level.value;
   startLevelPreview();
 });

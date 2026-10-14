@@ -13,7 +13,7 @@
     </div>
 
     <div class="d-flex justify-center mt-6">
-      <v-btn variant="outlined" class="mr-3" @click="router.push('/')">
+      <v-btn variant="outlined" class="mr-3" @click="router.push(EMBED ? '/' : '/preloader')">
         <v-icon>chevron_left</v-icon>
       </v-btn>
       <v-btn size="large" color="primary" :disabled="!agreed" @click="next">
@@ -27,14 +27,15 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { UseStore } from '@/stores/UseStore';
+import { EMBED } from '@/config';
 
 const router = useRouter();
 const store = UseStore();
 const agreed = ref(false);
 
 onMounted(() => {
-  if (store.soundLibrary == null) router.push('/');
+  if (store.soundLibrary == null) router.push(EMBED ? '/' : '/preloader');
 });
 
-const next = () => router.push('/level');
+const next = () => router.push(EMBED ? '/level' : '/calibration');
 </script>

@@ -64,12 +64,12 @@ const { play, playCalibrationTone, stopCalibrationTone, isPlaying } = PlayDigits
 onMounted(() => {
   //check if calibration is valid. redirect back to preloader page if needed.
   if (store.calibrationValid == false) {
-    router.push("/")
+    router.push("/preloader")
   }
 })
 
 const nextClicked = () => {
-  router.push("/task");
+  router.push("/instructions");
 }
 
 </script>

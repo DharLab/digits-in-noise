@@ -4,18 +4,49 @@ import { EMBED } from '@/config'
 const clinicalRoutes = [
   {
     path: '/',
+    name: 'splash',
+    component: () => import('../views/SplashView.vue'),
+  },
+  {
+    path: '/preloader',
     name: 'preloader',
     component: () => import('../views/PreloaderView.vue'),
   },
   {
+    // Same quiet-place/headphones disclaimer the embed build shows.
+    path: '/disclaimer',
+    name: 'disclaimer',
+    component: () => import('../views/DisclaimerView.vue'),
+  },
+  {
+    // Default calibration path: a self-set comfortable-level slider ("Patient Calibration"),
+    // same screen the embed build uses. A small link on this screen leads to the
+    // SPL-meter/file-based "Researcher Calibration" below.
     path: '/calibration',
     name: 'calibration',
+    component: () => import('../views/LevelView.vue'),
+  },
+  {
+    // SPL-meter / calibration-file flow for a researcher running the session.
+    path: '/researcher-calibration',
+    name: 'researcher-calibration',
     component: () => import('../views/CalibrationView.vue'),
   },
   {
     path: '/level',
     name: 'level',
     component: () => import('../views/ListenLevel.vue'),
+  },
+  {
+    path: '/sound-test',
+    name: 'sound-test',
+    component: () => import('../views/SoundCheckView.vue'),
+  },
+  {
+    // Same "how the task works" screen the embed build shows, right before the task starts.
+    path: '/instructions',
+    name: 'instructions',
+    component: () => import('../views/InstructionsView.vue'),
   },
   {
     path: '/task',
@@ -87,6 +118,13 @@ router.beforeEach(async (to, from, next) => {
     window.onbeforeunload = function () {
       return "Are you sure you want to leave?";
     };
+  }
+
+  if (to.query.restart) {
+    // Explicit "Start Over" action (see StartOverButton.vue) - allowed to jump
+    // into /task from anywhere, bypassing the one-way forward-only lock below.
+    next();
+    return;
   }
 
   if (from.meta.oneWay == true) {
